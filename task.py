@@ -28,7 +28,28 @@ class Task():
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
+        # reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
+
+        # we want our agent to ideally fly at constant height without drastic changes in its angles
+        # as if it were imaging the ground and it hovers 
+
+        # reward positively if vertical distance to target is less than, or equal to one (absolute)
+        reward = 0
+        z_distance = abs(self.sim.pose[2] - self.target_pos[2])
+        if z_distance <= 1:
+            if z_distance == 0:
+                reward += 2
+            else:
+                reward += 1
+        else:
+            reward -= 1
+
+        # reward low angular velocities
+        if (all(x < 0.2 for x in self.sim.angular_v)):
+            reward += 1
+        else:
+            reward -= 1
+
         return reward
 
     def step(self, rotor_speeds):
